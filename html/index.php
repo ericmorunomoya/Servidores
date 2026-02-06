@@ -1,34 +1,38 @@
-<?php
-$host = 'db';
-$user = 'user_eric';
-$password = 'user_password';
-$db = 'mi_web_db';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Eric</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        #resultado { margin-top: 20px; padding: 10px; border: 1px solid #ddd; display: inline-block; min-width: 300px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
 
-// Intentar conectar hasta 5 veces si falla
-$max_intentos = 5;
-$conn = null;
+    <h1>Consulta de Base de Datos</h1>
+    <button id="btnConsultar">Obtener mis datos</button>
 
-for ($i = 0; $i < $max_intentos; $i++) {
-    try {
-        $conn = new mysqli($host, $user, $password, $db);
-        if (!$conn->connect_error) break;
-    } catch (mysqli_sql_exception $e) {
-        if ($i == $max_intentos - 1) die("Error final de conexión: " . $e->getMessage());
-        sleep(2); // Esperar 2 segundos antes de reintentar
-    }
-}
+    <div id="resultado">Los datos aparecerán aquí...</div>
 
-$sql = "SELECT nombre, email FROM usuarios";
-$result = $conn->query($sql);
+    <script>
+        document.getElementById('btnConsultar').addEventListener('click', function() {
+            const divResultado = document.getElementById('resultado');
+            divResultado.innerHTML = "Consultando...";
 
-echo "<h1>Datos desde la Base de Datos</h1>";
-
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        echo "<strong>Nombre:</strong> " . $row["nombre"]. " - <strong>Email:</strong> " . $row["email"] . "<br>";
-    }
-} else {
-    echo "Base de datos conectada, pero no hay registros.";
-}
-$conn->close();
-?>
+            // Llamada AJAX a datos.php
+            fetch('datos.php')
+                .then(response => response.text())
+                .then(data => {
+                    divResultado.innerHTML = data;
+                })
+                .catch(error => {
+                    divResultado.innerHTML = "Error al consultar los datos.";
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+</body>
+</html>
