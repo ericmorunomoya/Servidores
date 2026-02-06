@@ -1,0 +1,31 @@
+services:
+  db:
+    image: mariadb:latest
+    container_name: mariadb_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: mi_web_db
+      MYSQL_USER: user_eric
+      MYSQL_PASSWORD: user_password
+    networks:
+      - red_interna
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  apache:
+    build: ./html
+    container_name: apache_container
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ./html:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - red_interna
+
+networks:
+  red_interna:
+    driver: bridge
